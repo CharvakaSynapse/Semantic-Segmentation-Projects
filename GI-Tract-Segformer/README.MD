@@ -13,19 +13,19 @@ Results from `gi_seg_eval_summary.csv` - see file for complete metrics.
 
 ### 📈 Quantitative Results (Small Bowel - Class 2)
 
-| Metric (↑ better unless noted) | SegFormer | U-Net | Δ (S−U) |
-|-------------------------------|-----------|-------|--------|
-| Dice                          | **0.877** | 0.820 | +0.058 |
-| HD95 (px) ↓                   | **5.914** | 11.177 | -5.263 |
-| ASD (px) ↓                    | **1.550** | 2.653 | -1.103 |
-| Surface Dice @2 px           | **0.865** | 0.783 | +0.081 |
-| Object-F1                     | **0.842** | 0.724 | +0.117 |
-| clDice                        | **0.875** | 0.815 | +0.060 |
+| Metric               | Better | SegFormer | U-Net | Δ (S−U) |
+|----------------------|:------:|---------:|------:|--------:|
+| Dice                 | Higher | **0.877** | 0.820 | +0.058 |
+| HD95 (px)            | Lower  | **5.914** | 11.177 | -5.263 |
+| ASD (px)             | Lower  | **1.550** | 2.653 | -1.103 |
+| Surface Dice @2 px   | Higher | **0.865** | 0.783 | +0.081 |
+| Object-F1            | Higher | **0.842** | 0.724 | +0.117 |
+| clDice               | Higher | **0.875** | 0.815 | +0.060 |
 
 ## Repository Contents
 
-- `unet.py` — U-Net training/validation/inference + metrics
-- `segformer.py` — SegFormer fine-tuning (HF SegformerForSemanticSegmentation) + metrics
+- 'GI-Tract-UNET.ipynb` — U-Net training/validation/inference + metrics
+- `GI-Tract-segformer.ipynb` — SegFormer fine-tuning (HF SegformerForSemanticSegmentation) + metrics
 - `gi_seg_eval_summary.csv` — consolidated experiment results
 - `segformer-cnn-segmentation-v4.pdf` — theory & empirical alignment
 
