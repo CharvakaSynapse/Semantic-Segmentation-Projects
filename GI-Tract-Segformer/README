@@ -81,6 +81,4 @@ pip install lightning transformers albumentations torchmetrics scikit-image scip
 
 ---
 
-### 🪪 License
 
-MIT / Apache-2.0 — pick your preferred open-source license
