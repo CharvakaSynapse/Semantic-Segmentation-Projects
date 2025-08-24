@@ -10,33 +10,14 @@ Includes:
 - 📊 CSV result summary: `gi_seg_eval_summary.csv`
 - 📄 Theoretical write-up: `segformer-cnn-segmentation-v4.pdf`
 
----
+...
 
-## 📈 Results (Small Bowel - Class 2)
+## 📚 Citation
 
-| Metric (↑ better unless noted) | SegFormer | U-Net | Δ (S−U) |
-|-------------------------------|-----------|-------|--------|
-| Dice                          | **0.877** | 0.820 | +0.058 |
-| HD95 (px) ↓                   | **5.914** | 11.177 | -5.263 |
-| ASD (px) ↓                    | **1.550** | 2.653 | -1.103 |
-| Surface Dice @2 px           | **0.865** | 0.783 | +0.081 |
-| Object-F1                    | **0.842** | 0.724 | +0.117 |
-| clDice                        | **0.875** | 0.815 | +0.060 |
+```
+Theoretical Framework for CNN vs Transformer Performance in Medical Segmentation: An Information-Geometric Analysis (2025)
+```
 
-> Full macro-averages and class-wise results in [`gi_seg_eval_summary.csv`](gi_seg_eval_summary.csv).
+## 🪪 License
 
----
-
-## 📁 Repo Contents
-
-- `unet.py`: U-Net pipeline (train/val/test)
-- `segformer.py`: SegFormer fine-tuning pipeline (HuggingFace)
-- `gi_seg_eval_summary.csv`: Consolidated evaluation metrics
-- `segformer-cnn-segmentation-v4.pdf`: Theory and empirical analysis
-
----
-
-## 🧪 Dataset
-
-Auto-downloaded on first run:
-
+MIT / Apache-2.0 / your choice
