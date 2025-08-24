@@ -1,30 +1,119 @@
-# Quantization-Aware Training with Knowledge Distillation
+# GI Tract Segmentation — U-Net vs SegFormer
 
-I recently tackled my first serious experiment with **Quantization-Aware Training (QAT)** to compress deep learning models while retaining performance. The experiments used **ResNet-50 on the CIFAR-100 dataset**. Here’s how the three approaches stacked up:
+End-to-end training, evaluation, and visualization pipelines for GI tract organ segmentation with two architectures:
 
-### 🧪 Approaches Compared
+- **U-Net** (from scratch, PyTorch)
+- **SegFormer** (Transformer encoder via Hugging Face)
 
-1. **QAT:** Standard 8-bit training that simulates INT8 operations during the forward pass.
+Includes a comprehensive evaluation suite (Dice, HD95, ASD, Surface-Dice, clDice, object-F1, volume similarity, FPR/FNR, continuity), an experiment summary CSV (`gi_seg_eval_summary.csv`), and a theoretical write-up (`segformer-cnn-segmentation-v4.pdf`) explaining when/why Transformers beat CNNs on tubular anatomy.
 
-2. **QAT + KD:** Combines QAT with knowledge distillation using a full-precision teacher model.
+## TL;DR
 
-3. **QAT + EntKD:** An experimental variation where the distillation temperature adapts based on the entropy of the teacher’s output — a rarely used but promising idea. Encouragingly, it delivers repeatable improvements in both vanilla and augmentation-enhanced training pipelines.
+Results from `gi_seg_eval_summary.csv` - see file for complete metrics.
 
----
+## Repository Contents
 
-### 🔍 Key Insights
+- `unet.py` — U-Net training/validation/inference + metrics
+- `segformer.py` — SegFormer fine-tuning (HF SegformerForSemanticSegmentation) + metrics
+- `gi_seg_eval_summary.csv` — consolidated experiment results
+- `segformer-cnn-segmentation-v4.pdf` — theory & empirical alignment
 
-- **🚀 Inference Speed:** INT8 quantized models run ~2× faster than FP32 counterparts.
-- **📈 Accuracy Gains:** All QAT variants slightly outperform the FP32 baseline.
-- **♻️ Entropy-Aware Distillation:** Entropy-conditioned temperature in EntKD is easy to implement and can generalize across distillation settings.
+Both training scripts:
+- log to TensorBoard
+- save top-k checkpoints
+- dump JSON of eval stats
+- export qualitative overlays (input / GT / prediction / overlay)
 
-  ![QAT vs FP32 Comparison](compare.png)
+## Dataset & Labels
 
----
+The scripts auto-download a prepared GI-tract dataset and unzip to:
 
-### 📦 Future Plans
+```
+./dataset_UWM_GI_Tract_train_valid/
+  train/{images,masks}/*.png
+  valid/{images,masks}/*.png
+```
 
-I’m working on exporting the QAT + EntKD model to **ONNX** for wider deployment and hardware acceleration. This will support lower-latency inference on edge devices and embedded systems.
+Default image size: 288×288 (configurable)
 
----
+Class ids & colors:
+- 0 Background (black)
+- 1 Stomach (blue)
+- 2 Small_Bowel (green)
+- 3 Large_Bowel (red)
 
+## Environment
+
+Tested with Python 3.10+.
+
+```bash
+# PyTorch (choose CUDA/CPU wheels as needed)
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
+# Core deps
+pip install lightning==2.* torchmetrics transformers albumentations opencv-python-headless
+pip install scikit-image scipy matplotlib requests torchinfo
+```
+
+**Windows:** set `NUM_WORKERS=0`.  
+**Linux/macOS:** workers auto-limited by script.
+
+## Quickstart — U-Net
+
+```bash
+python unet.py
+```
+
+- Logs: `./tb_logs/unet_medical_segmentation/`
+- Best ckpts: `unet_ckpt_{epoch}-vloss_{...}_vf1_{...}.ckpt`
+- Metrics JSON: `unet_evaluation_results.json`
+- Overlays: `./unet_inference_results/`
+
+## Quickstart — SegFormer
+
+```bash
+python segformer.py
+```
+
+- Model: `nvidia/segformer-b4-finetuned-ade-512-512` (configurable)
+- Logs: `./tb_logs/medical_segmentation/`
+- Best ckpts: `segmentation_ckpt_{epoch}-vloss_{...}_vf1_{...}.ckpt`
+- Metrics JSON: `comprehensive_evaluation_results.json`
+- Overlays: `./inference_results/`
+
+## Training Knobs You'll Likely Touch
+
+- **Batch/Image size:** `TrainingConfig.BATCH_SIZE`, `DatasetConfig.IMAGE_SIZE`
+- **LR/optimizer:** `TrainingConfig.INIT_LR`, `OPTIMIZER_NAME` (default AdamW), `WEIGHT_DECAY`
+- **Augmentations:** see `MedicalDataset.setup_transforms(...)` (Albumentations)
+- **Metrics:** `SegmentationMetrics` implements Dice, HD95, ASD, Surface-Dice @2 px, clDice, object-F1, volume similarity, FPR/FNR, continuity
+
+## Outputs & Logging
+
+```bash
+tensorboard --logdir=tb_logs
+```
+
+**Artifacts:**
+- `*_evaluation_results.json` — per-class summary with mean/std/median/quartiles
+- `*/inference_results/*.png` — qualitative overlays
+- `gi_seg_eval_summary.csv` — the consolidated results used in the TL;DR
+- `segformer-cnn-segmentation-v4.pdf` — the theoretical write-up
+
+## Repro Tips
+
+- **Determinism:** `pl.seed_everything(42, workers=True)` in both scripts
+- **Mixed precision:** enabled automatically on GPU (Lightning Trainer)
+- **Dataloaders:** increase `NUM_WORKERS` and set `pin_memory=True` on Linux
+- **VRAM:** if OOM with SegFormer, reduce batch size or image size
+
+## Why Transformers Win Here (1-paragraph version)
+
+Tubular anatomy (e.g., small bowel) demands global context to maintain topology and local precision for boundaries. Self-attention gives one-hop, non-local information flow along the structure, reducing breaks and false negatives, while SegFormer's decoder preserves edges. That's why, in the CSV, SegFormer improves Dice, HD95, ASD, Surface-Dice, clDice, and object-F1 over U-Net—precisely what the PDF formalizes.
+
+## Citation
+
+If you use this repo, please cite:
+
+*Theoretical Framework for CNN vs Transformer Performance in Medical Segmentation: An Information-Geometric Analysis* — 2025.  
+(see `segformer-cnn-segmentation-v4.pdf`)
