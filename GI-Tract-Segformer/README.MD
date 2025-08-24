@@ -11,6 +11,17 @@ Includes a comprehensive evaluation suite (Dice, HD95, ASD, Surface-Dice, clDice
 
 Results from `gi_seg_eval_summary.csv` - see file for complete metrics.
 
+### 📈 Quantitative Results (Small Bowel - Class 2)
+
+| Metric (↑ better unless noted) | SegFormer | U-Net | Δ (S−U) |
+|-------------------------------|-----------|-------|--------|
+| Dice                          | **0.877** | 0.820 | +0.058 |
+| HD95 (px) ↓                   | **5.914** | 11.177 | -5.263 |
+| ASD (px) ↓                    | **1.550** | 2.653 | -1.103 |
+| Surface Dice @2 px           | **0.865** | 0.783 | +0.081 |
+| Object-F1                     | **0.842** | 0.724 | +0.117 |
+| clDice                        | **0.875** | 0.815 | +0.060 |
+
 ## Repository Contents
 
 - `unet.py` — U-Net training/validation/inference + metrics
@@ -58,28 +69,7 @@ pip install scikit-image scipy matplotlib requests torchinfo
 **Windows:** set `NUM_WORKERS=0`.  
 **Linux/macOS:** workers auto-limited by script.
 
-## Quickstart — U-Net
 
-```bash
-python unet.py
-```
-
-- Logs: `./tb_logs/unet_medical_segmentation/`
-- Best ckpts: `unet_ckpt_{epoch}-vloss_{...}_vf1_{...}.ckpt`
-- Metrics JSON: `unet_evaluation_results.json`
-- Overlays: `./unet_inference_results/`
-
-## Quickstart — SegFormer
-
-```bash
-python segformer.py
-```
-
-- Model: `nvidia/segformer-b4-finetuned-ade-512-512` (configurable)
-- Logs: `./tb_logs/medical_segmentation/`
-- Best ckpts: `segmentation_ckpt_{epoch}-vloss_{...}_vf1_{...}.ckpt`
-- Metrics JSON: `comprehensive_evaluation_results.json`
-- Overlays: `./inference_results/`
 
 ## Training Knobs You'll Likely Touch
 
